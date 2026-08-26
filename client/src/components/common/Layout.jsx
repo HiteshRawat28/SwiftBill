@@ -20,7 +20,7 @@ const Layout = () => {
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/inventory', label: 'Inventory', icon: Package },
     { path: '/parties', label: 'Parties', icon: Users },
-    { path: '/invoices', label: 'Invoices', icon: FileText },
+    { path: '/transactions', label: 'Transactions', icon: FileText },
   ];
 
   return (

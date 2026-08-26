@@ -4,6 +4,7 @@ const authRoutes = require('./routes/auth.routes');
 const productRoutes = require('./routes/product.routes');
 const lookupRoutes = require('./routes/lookup.routes');
 const partyRoutes = require('./routes/party.routes');
+const transactionRoutes = require('./routes/transaction.routes');
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/lookups', lookupRoutes);
 app.use('/api/parties', partyRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

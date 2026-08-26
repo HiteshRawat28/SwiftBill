@@ -39,8 +39,8 @@ const Transactions = () => {
   const downloadInvoice = async (transactionId, invoiceNumber) => {
     const token = localStorage.getItem('token');
     try {
-      // Use the same base URL as apiClient
-      const baseUrl = 'http://localhost:3000/api';
+      // Use the environment variable if available
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
       const response = await fetch(`${baseUrl}/invoices/${transactionId}/pdf`, {
         headers: {
           'Authorization': `Bearer ${token}`

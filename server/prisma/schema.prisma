@@ -51,3 +51,22 @@ model Product {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
+
+enum PartyType {
+  Customer
+  Supplier
+}
+
+model Party {
+  id        Int       @id @default(autoincrement())
+  name      String
+  type      PartyType
+  email     String?
+  phone     String?
+  address   String?
+  state     String
+  gstin     String?   @unique
+  balance   Int       @default(0) // paise. positive = receivable, negative = payable
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}

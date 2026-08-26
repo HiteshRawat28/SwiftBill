@@ -3,6 +3,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
 const productRoutes = require('./routes/product.routes');
 const lookupRoutes = require('./routes/lookup.routes');
+const partyRoutes = require('./routes/party.routes');
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/lookups', lookupRoutes);
+app.use('/api/parties', partyRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

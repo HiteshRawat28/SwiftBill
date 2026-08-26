@@ -4,6 +4,7 @@ import Layout from './components/common/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
+import Parties from './pages/Parties';
 import useAuthStore from './store/authStore';
 
 // Guard for protected routes
@@ -22,6 +23,7 @@ const App = () => {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="inventory" element={<Inventory />} />
+          <Route path="parties" element={<Parties />} />
         </Route>
       </Routes>
     </Router>

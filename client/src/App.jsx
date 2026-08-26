@@ -1,25 +1,31 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/common/Layout';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Inventory from './pages/Inventory';
+import useAuthStore from './store/authStore';
 
-function App() {
+// Guard for protected routes
+const ProtectedRoute = ({ children }) => {
+  const token = useAuthStore(state => state.token);
+  if (!token) return <Navigate to="/login" replace />;
+  return children;
+};
+
+const App = () => {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-        
-        {/* Protected Routes */}
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="inventory" element={<div>Inventory (Phase 3)</div>} />
-          <Route path="parties" element={<div>Parties (Phase 4)</div>} />
-          <Route path="invoices" element={<div>Invoices (Phase 6)</div>} />
+        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="inventory" element={<Inventory />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
-}
+};
 
 export default App;

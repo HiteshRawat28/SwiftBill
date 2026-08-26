@@ -33,7 +33,8 @@ const Layout = () => {
         <nav className="sidebar-nav">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path;
+            // Handle both / and /dashboard matching
+            const isActive = location.pathname === item.path || (item.path === '/' && location.pathname === '/dashboard');
             return (
               <Link
                 key={item.path}

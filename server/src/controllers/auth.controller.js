@@ -61,4 +61,8 @@ const getMe = async (req, res) => {
   }
 };
 
-module.exports = { login, getMe };
+const adminOnly = (req, res) => {
+  res.json({ message: 'Success! You accessed an admin-only route.', user: req.user });
+};
+
+module.exports = { login, getMe, adminOnly };

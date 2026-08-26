@@ -34,6 +34,38 @@ const Transactions = () => {
     fetchTransactions();
   };
 
+  // Construct URL for PDF download via the backend API directly
+  const getPdfUrl = (transactionId) => {
+    const token = localStorage.getItem('auth-storage') ? JSON.parse(localStorage.getItem('auth-storage')).state.token : '';
+    // Normally you would pass the token via a custom API call and trigger a download via blob.
+    // For simplicity with an `a` tag or window.open without complex headers, we could pass token in query (less secure) 
+    // or use a helper function to fetch and download as blob. Let's use a simple fetch blob helper.
+  };
+
+  const downloadInvoice = async (transactionId, invoiceNumber) => {
+    const token = JSON.parse(localStorage.getItem('auth-storage'))?.state?.token;
+    try {
+      const response = await fetch(`http://localhost:3000/api/invoices/${transactionId}/pdf`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to download invoice');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${invoiceNumber}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (error) {
+      console.error(error);
+      alert('Could not download PDF');
+    }
+  };
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -57,11 +89,11 @@ const Transactions = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-                <th style={{ padding: '12px 16px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Date</th>
+                <th style={{ padding: '12px 16px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Date & Inv #</th>
                 <th style={{ padding: '12px 16px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Type</th>
                 <th style={{ padding: '12px 16px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Party</th>
-                <th style={{ padding: '12px 16px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Items</th>
                 <th style={{ padding: '12px 16px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Total Amount</th>
+                <th style={{ padding: '12px 16px', color: 'var(--color-text-secondary)', fontWeight: 500, textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -75,7 +107,10 @@ const Transactions = () => {
                 transactions.map((t) => {
                   return (
                     <tr key={t.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                      <td style={{ padding: '12px 16px' }}>{new Date(t.date).toLocaleDateString()}</td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div>{new Date(t.date).toLocaleDateString()}</div>
+                        {t.invoiceNumber && <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>{t.invoiceNumber}</div>}
+                      </td>
                       <td style={{ padding: '12px 16px' }}>
                         <span style={{ 
                           padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 600,
@@ -87,12 +122,17 @@ const Transactions = () => {
                       </td>
                       <td style={{ padding: '12px 16px' }}>
                         <div style={{ fontWeight: 500 }}>{t.party?.name}</div>
-                      </td>
-                      <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-                        {t.lineItems.length} items
+                        <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{t.lineItems.length} items</div>
                       </td>
                       <td style={{ padding: '12px 16px', fontWeight: 600 }}>
                         ₹{(t.totalAmount / 100).toFixed(2)}
+                      </td>
+                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                        {t.type === 'Sale' && (
+                          <button onClick={() => downloadInvoice(t.id, t.invoiceNumber)} style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--color-primary)', background: 'transparent', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '12px', fontWeight: 500 }}>
+                            Download PDF
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );

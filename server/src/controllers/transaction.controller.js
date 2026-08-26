@@ -1,7 +1,9 @@
 const { PrismaClient } = require('@prisma/client');
 const { z } = require('zod');
+const { calculateGST } = require('../services/gst.service');
 
 const prisma = new PrismaClient();
+const BUSINESS_STATE = process.env.BUSINESS_STATE || 'Maharashtra';
 
 const lineItemSchema = z.object({
   productId: z.number().int().positive(),
@@ -15,6 +17,22 @@ const transactionSchema = z.object({
   date: z.string().datetime().optional(),
   lineItems: z.array(lineItemSchema).min(1),
 });
+
+// Helper to generate invoice number (e.g., INV-0001)
+const generateInvoiceNumber = async () => {
+  const lastTx = await prisma.transaction.findFirst({
+    where: { type: 'Sale' },
+    orderBy: { id: 'desc' },
+  });
+  
+  if (!lastTx || !lastTx.invoiceNumber) {
+    return 'INV-0001';
+  }
+  
+  const lastNum = parseInt(lastTx.invoiceNumber.split('-')[1]);
+  const nextNum = (lastNum + 1).toString().padStart(4, '0');
+  return `INV-${nextNum}`;
+};
 
 const getTransactions = async (req, res) => {
   try {
@@ -43,8 +61,44 @@ const createTransaction = async (req, res) => {
 
     const { partyId, type, date, lineItems } = parsed.data;
 
-    // Calculate total amount
-    const totalAmount = lineItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+    // Fetch the party to get their state for GST calc
+    const party = await prisma.party.findUnique({ where: { id: partyId } });
+    if (!party) {
+      return res.status(404).json({ error: { message: 'Party not found' } });
+    }
+
+    // Process line items and calculate taxes
+    let grandTotalAmount = 0;
+    const processedLineItems = [];
+
+    for (const item of lineItems) {
+      const product = await prisma.product.findUnique({ where: { id: item.productId } });
+      if (!product) {
+        return res.status(404).json({ error: { message: `Product ${item.productId} not found` } });
+      }
+
+      const baseLineTotal = item.quantity * item.unitPrice;
+      const gst = calculateGST(BUSINESS_STATE, party.state, baseLineTotal, product.gstRate || 18);
+      
+      const itemGrandTotal = baseLineTotal + gst.totalTax;
+      grandTotalAmount += itemGrandTotal;
+
+      processedLineItems.push({
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        totalPrice: baseLineTotal, // store base price without tax in totalPrice for clarity (or store with tax? Let's keep it base)
+        cgst: gst.cgst,
+        sgst: gst.sgst,
+        igst: gst.igst
+      });
+    }
+
+    // Auto-generate invoice number if Sale
+    let invoiceNumber = null;
+    if (type === 'Sale') {
+      invoiceNumber = await generateInvoiceNumber();
+    }
 
     // Execute everything in a single transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -53,15 +107,11 @@ const createTransaction = async (req, res) => {
         data: {
           partyId,
           type,
-          date: date || new Date(),
-          totalAmount,
+          invoiceNumber,
+          date: date ? new Date(date) : new Date(),
+          totalAmount: grandTotalAmount,
           lineItems: {
-            create: lineItems.map(item => ({
-              productId: item.productId,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-              totalPrice: item.quantity * item.unitPrice
-            }))
+            create: processedLineItems
           }
         },
         include: {
@@ -73,9 +123,8 @@ const createTransaction = async (req, res) => {
       // 2. Update stock for each product
       for (const item of lineItems) {
         if (type === 'Sale') {
-          // Check stock first (optional, but good practice to prevent negative stock)
+          // Check stock first
           const product = await tx.product.findUnique({ where: { id: item.productId } });
-          if (!product) throw new Error(`Product ${item.productId} not found`);
           if (product.stockQuantity < item.quantity) {
             throw new Error(`Insufficient stock for product ${product.name}`);
           }
@@ -93,7 +142,7 @@ const createTransaction = async (req, res) => {
 
       // 3. Update Party Balance
       // Sales increase receivable (positive). Purchases increase payable (negative)
-      const balanceChange = type === 'Sale' ? totalAmount : -totalAmount;
+      const balanceChange = type === 'Sale' ? grandTotalAmount : -grandTotalAmount;
       await tx.party.update({
         where: { id: partyId },
         data: { balance: { increment: balanceChange } }

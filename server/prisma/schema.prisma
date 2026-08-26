@@ -46,6 +46,7 @@ model Product {
   unitId            Int
   unit              Unit      @relation(fields: [unitId], references: [id])
   price             Int       // Stored in paise
+  gstRate           Int       @default(18)
   stockQuantity     Int       @default(0)
   lowStockThreshold Int       @default(5)
   createdAt         DateTime  @default(now())
@@ -80,9 +81,10 @@ enum TransactionType {
 }
 
 model Transaction {
-  id          Int       @id @default(autoincrement())
-  type        TransactionType
-  partyId     Int
+  id            Int       @id @default(autoincrement())
+  invoiceNumber String?   @unique
+  type          TransactionType
+  partyId       Int
   party       Party     @relation(fields: [partyId], references: [id])
   totalAmount Int       // paise
   date        DateTime  @default(now())
@@ -101,4 +103,7 @@ model TransactionLineItem {
   quantity      Int
   unitPrice     Int         // paise
   totalPrice    Int         // paise
+  cgst          Int         @default(0) // paise
+  sgst          Int         @default(0) // paise
+  igst          Int         @default(0) // paise
 }

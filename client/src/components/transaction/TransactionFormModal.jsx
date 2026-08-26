@@ -3,6 +3,7 @@ import { createTransaction } from '../../api/transactionApi';
 import { getParties } from '../../api/partyApi';
 import { getProducts } from '../../api/inventoryApi';
 import { calculateGST } from '../../utils/gstUtils';
+import { requiresEwayBill } from '../../utils/ewaybillUtils';
 
 // Hardcoded for now. In a real app, fetch from a settings API.
 const BUSINESS_STATE = 'Maharashtra';
@@ -114,11 +115,19 @@ const TransactionFormModal = ({ type, onClose }) => {
   };
 
   const preview = calculatePreview();
+  const showEwayAlert = requiresEwayBill(parseFloat(preview.grandTotal));
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
       <div className="card" style={{ width: '100%', maxWidth: '800px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
-        <h2 style={{ marginBottom: '24px' }}>Record {type}</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <h2>Record {type}</h2>
+          {showEwayAlert && (
+            <div style={{ padding: '6px 12px', backgroundColor: 'var(--color-error)', color: 'white', borderRadius: '4px', fontSize: '14px', fontWeight: 600 }}>
+              ⚠️ E-Way Bill Required (> ₹50k)
+            </div>
+          )}
+        </div>
         
         <form onSubmit={handleSubmit} style={{ overflowY: 'auto', flex: 1, paddingRight: '8px' }}>
           <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>

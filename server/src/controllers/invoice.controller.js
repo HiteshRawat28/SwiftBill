@@ -32,7 +32,7 @@ const generateInvoicePDF = async (req, res) => {
     generateHeader(doc);
     generateCustomerInformation(doc, transaction);
     generateInvoiceTable(doc, transaction);
-    generateFooter(doc);
+    generateFooter(doc, transaction);
 
     doc.end();
   } catch (error) {
@@ -140,8 +140,23 @@ function generateInvoiceTable(doc, invoice) {
   doc.font('Helvetica');
 }
 
-function generateFooter(doc) {
+function generateFooter(doc, invoice) {
+  const isEwayBillRequired = invoice.totalAmount >= 5000000; // 50,000 INR in paise
+
+  if (isEwayBillRequired) {
+    doc
+      .fillColor('red')
+      .fontSize(10)
+      .text(
+        'E-Way Bill Required: Consignment value exceeds Rs. 50,000.',
+        50,
+        680,
+        { align: 'center', width: 500 }
+      );
+  }
+
   doc
+    .fillColor('#444444')
     .fontSize(10)
     .text(
       'Payment is due within 15 days. Thank you for your business.',

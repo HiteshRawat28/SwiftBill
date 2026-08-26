@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getTransactions } from '../../api/transactionApi';
 import RoleGuard from '../common/RoleGuard';
 import TransactionFormModal from '../transaction/TransactionFormModal';
+import { requiresEwayBill } from '../../utils/ewaybillUtils';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -32,14 +33,6 @@ const Transactions = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     fetchTransactions();
-  };
-
-  // Construct URL for PDF download via the backend API directly
-  const getPdfUrl = (transactionId) => {
-    const token = localStorage.getItem('auth-storage') ? JSON.parse(localStorage.getItem('auth-storage')).state.token : '';
-    // Normally you would pass the token via a custom API call and trigger a download via blob.
-    // For simplicity with an `a` tag or window.open without complex headers, we could pass token in query (less secure) 
-    // or use a helper function to fetch and download as blob. Let's use a simple fetch blob helper.
   };
 
   const downloadInvoice = async (transactionId, invoiceNumber) => {
@@ -105,6 +98,8 @@ const Transactions = () => {
                 </tr>
               ) : (
                 transactions.map((t) => {
+                  const needsEwayBill = requiresEwayBill(t.totalAmount / 100);
+                  
                   return (
                     <tr key={t.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
                       <td style={{ padding: '12px 16px' }}>
@@ -125,7 +120,14 @@ const Transactions = () => {
                         <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{t.lineItems.length} items</div>
                       </td>
                       <td style={{ padding: '12px 16px', fontWeight: 600 }}>
-                        ₹{(t.totalAmount / 100).toFixed(2)}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          ₹{(t.totalAmount / 100).toFixed(2)}
+                          {needsEwayBill && (
+                            <span style={{ padding: '2px 6px', backgroundColor: 'var(--color-error)', color: 'white', borderRadius: '4px', fontSize: '10px' }}>
+                              🚚 E-Way
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                         {t.type === 'Sale' && (

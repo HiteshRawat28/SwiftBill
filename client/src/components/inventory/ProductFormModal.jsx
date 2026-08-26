@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { createProduct, updateProduct, getCategories, createCategory, getUnits, createUnit } from '../../api/inventoryApi';
 
 const ProductFormModal = ({ product, onClose }) => {
@@ -51,9 +52,10 @@ const ProductFormModal = ({ product, onClose }) => {
       setCategories([...categories, cat]);
       setFormData(prev => ({ ...prev, categoryId: cat.id }));
       setShowNewCat(false);
+      toast.success('Category added successfully');
       setNewCatName('');
     } catch (err) {
-      alert('Failed to add category');
+      toast.error('Failed to add category');
     }
   };
 
@@ -65,9 +67,10 @@ const ProductFormModal = ({ product, onClose }) => {
       setUnits([...units, un]);
       setFormData(prev => ({ ...prev, unitId: un.id }));
       setShowNewUnit(false);
+      toast.success('Unit added successfully');
       setNewUnitName('');
     } catch (err) {
-      alert('Failed to add unit');
+      toast.error('Failed to add unit');
     }
   };
 
@@ -88,10 +91,11 @@ const ProductFormModal = ({ product, onClose }) => {
         await updateProduct(product.id, payload);
       } else {
         await createProduct(payload);
+        toast.success('Product added successfully');
       }
       onClose();
     } catch (error) {
-      alert(error.response?.data?.error?.message || 'Failed to save product');
+      toast.error(error.response?.data?.error?.message || 'Failed to save product');
     }
   };
 

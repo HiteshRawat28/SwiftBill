@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { createTransaction } from '../../api/transactionApi';
 import { getParties } from '../../api/partyApi';
 import { getProducts } from '../../api/inventoryApi';
@@ -108,9 +109,10 @@ const TransactionFormModal = ({ type, onClose }) => {
       };
 
       await createTransaction(payload);
+      toast.success('Transaction recorded successfully');
       onClose();
     } catch (error) {
-      alert(error.response?.data?.error?.message || 'Failed to record transaction');
+      toast.error(error.response?.data?.error?.message || 'Failed to record transaction');
     }
   };
 

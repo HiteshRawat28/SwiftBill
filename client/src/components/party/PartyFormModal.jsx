@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { createParty, updateParty } from '../../api/partyApi';
 
 // Standard list of Indian States for GST calculations
@@ -57,10 +58,11 @@ const PartyFormModal = ({ party, onClose }) => {
         await updateParty(party.id, payload);
       } else {
         await createParty(payload);
+        toast.success('Party added successfully');
       }
       onClose();
     } catch (error) {
-      alert(error.response?.data?.error?.message || 'Failed to save party');
+      toast.error(error.response?.data?.error?.message || 'Failed to save party');
     }
   };
 

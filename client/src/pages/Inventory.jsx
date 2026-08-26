@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { getProducts, deleteProduct } from "../api/inventoryApi";
 import RoleGuard from "../components/common/RoleGuard";
 import ProductFormModal from "../components/inventory/ProductFormModal";
@@ -33,10 +34,10 @@ const Inventory = () => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await deleteProduct(id);
-        fetchProducts();
+        setProducts(products.filter(p => p.id !== id));
+        toast.success('Product deleted successfully');
       } catch (error) {
-        console.error('Failed to delete product', error);
-        alert('Could not delete product');
+        toast.error('Could not delete product');
       }
     }
   };

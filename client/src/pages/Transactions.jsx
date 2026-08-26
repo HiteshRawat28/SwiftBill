@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { getTransactions } from '../api/transactionApi';
 import RoleGuard from '../components/common/RoleGuard';
 import TransactionFormModal from '../components/transaction/TransactionFormModal';
@@ -53,9 +54,10 @@ const Transactions = () => {
       document.body.appendChild(a);
       a.click();
       a.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success('Invoice downloaded successfully');
     } catch (error) {
-      console.error(error);
-      alert('Could not download PDF');
+      toast.error('Could not download PDF');
     }
   };
 

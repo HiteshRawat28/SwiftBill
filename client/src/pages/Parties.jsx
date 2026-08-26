@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { getParties, deleteParty } from "../api/partyApi";
 import RoleGuard from "../components/common/RoleGuard";
 import PartyFormModal from "../components/party/PartyFormModal";
@@ -34,10 +35,10 @@ const Parties = () => {
     if (window.confirm('Are you sure you want to delete this party?')) {
       try {
         await deleteParty(id);
-        fetchParties();
+        setParties(parties.filter(p => p.id !== id));
+        toast.success('Party deleted successfully');
       } catch (error) {
-        console.error('Failed to delete party', error);
-        alert('Could not delete party');
+        toast.error('Could not delete party');
       }
     }
   };

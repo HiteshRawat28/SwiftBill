@@ -1,6 +1,29 @@
-project_scaffold
+# IDEs and Editors
+.vscode/
+.idea/
+.DS_Store
 
-client/node_modules
+# Logs
+*.log
+npm-debug.log*
 
-server/node_modules
+# Node modules
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment variables
+.env
+.env.*
+!.env.example
 server/.env
+
+# Prisma
+server/prisma/*.db
+
+# Build outputs
+client/dist/
+
+# Project Scaffold (Documentation)
+# Remove this line if you want to push your documentation/PRD to GitHub!
+project_scaffold/

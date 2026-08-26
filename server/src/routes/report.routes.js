@@ -5,7 +5,8 @@ const {
   getGstLiability, 
   getStockValuation 
 } = require('../controllers/report.controller');
-const { requireAuth, requireRole } = require('../middleware/auth.middleware');
+const { requireAuth } = require('../middleware/auth.middleware');
+const { requireRole } = require('../middleware/rbac.middleware');
 
 const router = express.Router();
 

@@ -37,9 +37,11 @@ const Transactions = () => {
   };
 
   const downloadInvoice = async (transactionId, invoiceNumber) => {
-    const token = JSON.parse(localStorage.getItem('auth-storage'))?.state?.token;
+    const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:3000/api/invoices/${transactionId}/pdf`, {
+      // Use the same base URL as apiClient
+      const baseUrl = 'http://localhost:3000/api';
+      const response = await fetch(`${baseUrl}/invoices/${transactionId}/pdf`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

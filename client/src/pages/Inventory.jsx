@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts, deleteProduct } from '../../api/inventoryApi';
-import RoleGuard from '../common/RoleGuard';
-import ProductFormModal from '../inventory/ProductFormModal';
+import { getProducts, deleteProduct } from "../api/inventoryApi";
+import RoleGuard from "../components/common/RoleGuard";
+import ProductFormModal from "../components/inventory/ProductFormModal";
 
 const Inventory = () => {
   const [products, setProducts] = useState([]);

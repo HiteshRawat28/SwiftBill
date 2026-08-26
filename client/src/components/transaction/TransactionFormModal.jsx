@@ -124,7 +124,7 @@ const TransactionFormModal = ({ type, onClose }) => {
           <h2>Record {type}</h2>
           {showEwayAlert && (
             <div style={{ padding: '6px 12px', backgroundColor: 'var(--color-error)', color: 'white', borderRadius: '4px', fontSize: '14px', fontWeight: 600 }}>
-              ⚠️ E-Way Bill Required (> ₹50k)
+              ⚠️ E-Way Bill Required (&gt; ₹50k)
             </div>
           )}
         </div>

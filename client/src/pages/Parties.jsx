@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getParties, deleteParty } from '../../api/partyApi';
-import RoleGuard from '../common/RoleGuard';
-import PartyFormModal from '../party/PartyFormModal';
+import { getParties, deleteParty } from "../api/partyApi";
+import RoleGuard from "../components/common/RoleGuard";
+import PartyFormModal from "../components/party/PartyFormModal";
 
 const Parties = () => {
   const [parties, setParties] = useState([]);

@@ -6,6 +6,7 @@ const lookupRoutes = require('./routes/lookup.routes');
 const partyRoutes = require('./routes/party.routes');
 const transactionRoutes = require('./routes/transaction.routes');
 const invoiceRoutes = require('./routes/invoice.routes');
+const reportRoutes = require('./routes/report.routes');
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use('/api/lookups', lookupRoutes);
 app.use('/api/parties', partyRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/invoices', invoiceRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
-import { LayoutDashboard, Package, FileText, Users, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, FileText, Users, LogOut, BarChart3 } from 'lucide-react';
 import './Layout.css';
 
 const Layout = () => {
@@ -21,6 +21,7 @@ const Layout = () => {
     { path: '/inventory', label: 'Inventory', icon: Package },
     { path: '/parties', label: 'Parties', icon: Users },
     { path: '/transactions', label: 'Transactions', icon: FileText },
+    { path: '/reports', label: 'Reports', icon: BarChart3 },
   ];
 
   return (

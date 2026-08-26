@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
 import Parties from './pages/Parties';
 import Transactions from './pages/Transactions';
+import Reports from './pages/Reports';
 import useAuthStore from './store/authStore';
 
 // Guard for protected routes
@@ -26,6 +27,7 @@ const App = () => {
           <Route path="inventory" element={<Inventory />} />
           <Route path="parties" element={<Parties />} />
           <Route path="transactions" element={<Transactions />} />
+          <Route path="reports" element={<Reports />} />
         </Route>
       </Routes>
     </Router>

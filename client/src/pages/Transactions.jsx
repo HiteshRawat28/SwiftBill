@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getTransactions } from '../../api/transactionApi';
-import RoleGuard from '../common/RoleGuard';
-import TransactionFormModal from '../transaction/TransactionFormModal';
-import { requiresEwayBill } from '../../utils/ewaybillUtils';
+import { getTransactions } from '../api/transactionApi';
+import RoleGuard from '../components/common/RoleGuard';
+import TransactionFormModal from '../components/transaction/TransactionFormModal';
+import { requiresEwayBill } from '../utils/ewaybillUtils';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);

@@ -1,68 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useAuthStore from '../store/authStore';
-import RoleGuard from '../components/common/RoleGuard';
-import apiClient from '../api/apiClient';
+import { getDashboardStats } from '../api/reportApi';
 
 const Dashboard = () => {
   const { user } = useAuthStore();
-  const [adminTestResult, setAdminTestResult] = useState('');
+  const [stats, setStats] = useState({
+    totalReceivables: 0,
+    totalPayables: 0,
+    lowStockCount: 0,
+    thisMonthSales: 0
+  });
+  const [loading, setLoading] = useState(true);
 
-  const testAdminRoute = async () => {
-    try {
-      const response = await apiClient.get('/auth/admin-only');
-      setAdminTestResult(response.data.message);
-    } catch (err) {
-      setAdminTestResult(err.response?.data?.error?.message || 'Failed to access route');
-    }
+  useEffect(() => {
+    getDashboardStats()
+      .then(data => setStats(data))
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const formatCurrency = (paise) => {
+    return `₹${(paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
   };
 
   return (
     <div>
       <h1 style={{ marginBottom: '24px' }}>Dashboard</h1>
       
-      <div className="card">
-        <h2>Welcome back!</h2>
+      <div className="card" style={{ marginBottom: '24px' }}>
+        <h2>Welcome back, {user?.email}!</h2>
         <p style={{ marginTop: '8px', color: 'var(--color-text-secondary)' }}>
-          You are logged in as <strong>{user?.email}</strong> with role <strong>{user?.role}</strong>.
+          Here is a quick overview of your business today.
         </p>
       </div>
 
-      <div style={{ marginTop: '24px', display: 'flex', gap: '16px', flexDirection: 'column' }}>
-        <RoleGuard allowedRoles={['Admin']}>
-          <div className="card" style={{ borderColor: 'var(--color-primary)' }}>
-            <h3>👑 Admin Actions</h3>
-            <p style={{ margin: '8px 0', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-              This card is wrapped in a <code>&lt;RoleGuard allowedRoles={['Admin']}&gt;</code>. You can only see this because you are an Admin.
-            </p>
-            <button className="btn-primary" onClick={testAdminRoute}>
-              Test Backend Admin Route
-            </button>
-            {adminTestResult && (
-              <div style={{ marginTop: '8px', padding: '8px', backgroundColor: 'var(--color-bg-main)', borderRadius: '4px', fontSize: '14px' }}>
-                {adminTestResult}
-              </div>
-            )}
+      {loading ? (
+        <div>Loading metrics...</div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px' }}>
+          
+          <div className="card" style={{ borderTop: '4px solid var(--color-success)', padding: '24px' }}>
+            <h3 style={{ fontSize: '14px', color: 'var(--color-text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Receivables</h3>
+            <div style={{ fontSize: '32px', fontWeight: 700, margin: '12px 0 8px 0' }}>
+              {formatCurrency(stats.totalReceivables)}
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>Money owed to you by customers</div>
           </div>
-        </RoleGuard>
 
-        <RoleGuard allowedRoles={['Admin', 'Accountant']}>
-          <div className="card" style={{ borderColor: 'var(--color-success)' }}>
-            <h3>📝 Accountant Actions</h3>
-            <p style={{ margin: '8px 0', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-              This section is visible to Admins and Accountants. Viewers cannot see this. (e.g. Create Invoice button)
-            </p>
+          <div className="card" style={{ borderTop: '4px solid var(--color-error)', padding: '24px' }}>
+            <h3 style={{ fontSize: '14px', color: 'var(--color-text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Payables</h3>
+            <div style={{ fontSize: '32px', fontWeight: 700, margin: '12px 0 8px 0' }}>
+              {formatCurrency(stats.totalPayables)}
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>Money you owe to suppliers</div>
           </div>
-        </RoleGuard>
 
-        <RoleGuard allowedRoles={['Admin', 'Accountant', 'Viewer']}>
-          <div className="card" style={{ borderColor: 'var(--color-border)' }}>
-            <h3>👀 Viewer Actions</h3>
-            <p style={{ margin: '8px 0', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-              This section is visible to everyone (Admin, Accountant, Viewer). (e.g. View Reports)
-            </p>
+          <div className="card" style={{ borderTop: '4px solid var(--color-primary)', padding: '24px' }}>
+            <h3 style={{ fontSize: '14px', color: 'var(--color-text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>This Month's Sales</h3>
+            <div style={{ fontSize: '32px', fontWeight: 700, margin: '12px 0 8px 0' }}>
+              {formatCurrency(stats.thisMonthSales)}
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>Gross sales since 1st of month</div>
           </div>
-        </RoleGuard>
-      </div>
+
+          <div className="card" style={{ borderTop: '4px solid #ff9800', padding: '24px' }}>
+            <h3 style={{ fontSize: '14px', color: 'var(--color-text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Low Stock Alerts</h3>
+            <div style={{ fontSize: '32px', fontWeight: 700, margin: '12px 0 8px 0' }}>
+              {stats.lowStockCount} <span style={{ fontSize: '16px', fontWeight: 500, color: 'var(--color-text-secondary)' }}>items</span>
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>Products at or below threshold</div>
+          </div>
+
+        </div>
+      )}
     </div>
   );
 };
